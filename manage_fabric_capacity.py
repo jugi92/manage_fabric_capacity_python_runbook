@@ -10,7 +10,7 @@ import requests
 parser = argparse.ArgumentParser()
 parser.add_argument("resource_id", help="The resource id of the capacity to change, e.g. /subscriptions/12345678-1234-1234-1234-123a12b12d1c/resourceGroups/fabric-rg/providers/Microsoft.Fabric/capacities/myf2capacity")
 parser.add_argument("operation", choices=["suspend", "resume", "scale"], help="The operation to perform, either suspend, resume or scale")
-parser.add_argument("sku", nargs="?", help="The sku to scale to, e.g. F4")
+parser.add_argument("sku", choices=[f"F{2**i}" for i in range(1,12)], nargs="?", help="The sku to scale to, e.g. F4")
 args = parser.parse_args()
 
 if os.getenv('IDENTITY_ENDPOINT'):
