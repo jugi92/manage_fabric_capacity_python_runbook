@@ -9,18 +9,9 @@ import requests
 
 parser = argparse.ArgumentParser()
 parser.add_argument("resource_id", help="The resource id of the capacity to change, e.g. /subscriptions/12345678-1234-1234-1234-123a12b12d1c/resourceGroups/fabric-rg/providers/Microsoft.Fabric/capacities/myf2capacity")
-parser.add_argument("operation", help="The operation to perform, either suspend, resume or scale")
+parser.add_argument("operation", choices=["suspend", "resume", "scale"], help="The operation to perform, either suspend, resume or scale")
 parser.add_argument("sku", nargs="?", help="The sku to scale to, e.g. F4")
 args = parser.parse_args()
-
-resource_id = args.resource_id
-
-operation = "suspend"
-if args.operation == "resume":
-    operation = "resume"
-if args.operation == "scale":
-    operation = "scale"
-    
 
 if os.getenv('IDENTITY_ENDPOINT'):
     # using managed identity
@@ -39,21 +30,21 @@ else:
     credential = DefaultAzureCredential()
     token = credential.get_token("https://management.azure.com/").token
 
-baseurl = f"https://management.azure.com{resource_id}/"
+base_url = f"https://management.azure.com{args.resource_id}"
 
-if operation == "scale":
+if args.operation == "scale":
     sku = args.sku
-    url = f"https://management.azure.com{resource_id}?api-version=2022-07-01-preview"
+    url = f"{base_url}?api-version=2022-07-01-preview"
     print(f"INFO: Scaling {url} to {sku}")
     payload = {"sku":{"name": sku,"tier":"Fabric"}}
     response = requests.patch(url, headers={'Content-Type': 'application/json', "Authorization": f"Bearer {token}"}, json=payload)
     response.raise_for_status()
 
 else:
-    url = f"https://management.azure.com{resource_id}/{operation}?api-version=2022-07-01-preview"
+    url = f"{base_url}/{args.operation}?api-version=2022-07-01-preview"
     print(f"INFO: Calling {url}")
     response = requests.post(url, headers={'Content-Type': 'application/json', "Authorization": f"Bearer {token}"})
     if not response.ok and response.json()["error"]["message"] == 'Service is not ready to be updated':
-        print(f"WARN: Service is not ready to be updated, probably it is already in desired state: {operation}")
+        print(f"WARN: Service is not ready to be updated, probably it is already in desired state: {args.operation}")
     else:
         response.raise_for_status()
