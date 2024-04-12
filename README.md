@@ -27,7 +27,7 @@ Choose from Gallery:
 Search Gallery for "Fabric":
 ![Search Gallery for "Fabric"](media/03_Screenshot_Search_Gallery_For_Fabric.png)
 
-Name the Runbook and select Python Runtime:
+Name the Runbook and select Python Runtime (currently only Python 3.8 supported, 3.10 is still in preview and does not include `requests` package):
 ![Name the Runbook and select Python Runtime](media/04_Screenshot_Name_Runbook_and_Select_Runtime_Environment.png)
 
 Publish the runbook:
